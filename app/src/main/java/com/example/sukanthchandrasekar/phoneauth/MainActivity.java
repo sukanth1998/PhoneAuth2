@@ -1,6 +1,8 @@
 package com.example.sukanthchandrasekar.phoneauth;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,7 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.ui.auth.util.ui.BucketedTextChangeListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -23,6 +27,8 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.hbb20.CountryCodePicker;
 
 import java.util.concurrent.TimeUnit;
+
+//import sun.applet.Main;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks
             verificationCallbacks;
     private PhoneAuthProvider.ForceResendingToken resendToken;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     private FirebaseAuth fbAuth;
     CountryCodePicker ccp;
@@ -61,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         ccp = (CountryCodePicker) findViewById(R.id.ccp);
         ccp.registerCarrierNumberEditText(phoneText);
 
+        sharedPreferences = getSharedPreferences("ReachMe", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
         verifyButton.setEnabled(false);
         resendButton.setEnabled(false);
         signoutButton.setEnabled(false);
@@ -68,7 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
         fbAuth = FirebaseAuth.getInstance();
 
+        if (sharedPreferences.contains("userKey")){
+            loginsuccess();
+        }
 
+    }
+
+    public void loginsuccess(){
+        startActivity(new Intent(MainActivity.this,HomeActivity.class));
+        finish();
     }
 
     public void sendCode(View view) {
@@ -93,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onVerificationCompleted(
                             PhoneAuthCredential credential) {
-
                         signoutButton.setEnabled(true);
                         statusText.setText("Signed In");
                         resendButton.setEnabled(false);
@@ -121,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
 
                         phoneVerificationId = verificationId;
                         resendToken = token;
-
                         verifyButton.setEnabled(true);
                         sendButton.setEnabled(false);
                         resendButton.setEnabled(true);
+                        Toast.makeText(getApplicationContext(),"OTP Sent",Toast.LENGTH_SHORT).show();
                     }
                 };
     }
@@ -151,12 +169,11 @@ public class MainActivity extends AppCompatActivity {
                             verifyButton.setEnabled(false);
                             FirebaseUser user = task.getResult().getUser();
                             String phoneNumber = user.getPhoneNumber();
-
-                            Intent intent = new Intent(MainActivity.this, success.class);
-                            intent.putExtra("phone", phoneNumber);
-                            startActivity(intent);
-                            finish();
-
+                            String uid = user.getUid();
+                            editor.putString("userKey",uid);
+                            editor.putString("userPhoneNumber",phoneNumber);
+                            editor.commit();
+                            loginsuccess();
                         } else {
                             if (task.getException() instanceof
                                     FirebaseAuthInvalidCredentialsException) {

@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "8956266879-07rl2elf9uqj3g9e29na3gd0cb0hsccq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sukanthchandrasekar.phoneauth",
+            "certificate_hash": "d6d71d7dddc60b002343183cd96c34f9de31add1"
+          }
+        },
+        {
           "client_id": "8956266879-2r0ql9slupjfgohmtp5fdn0ci4v7vtoc.apps.googleusercontent.com",
           "client_type": 3
         }
